@@ -9,7 +9,27 @@ export interface UserAttributes {
 }
 
 export interface SellerShipperAttributes {
-    id: number;
+    id?: number;
     sellerId: string;
     shipperId: string;
+}
+
+export interface ProductAttributes {
+    id?: number;
+    productId: string;
+    name: string;
+    sellerId: string;
+    totalQuantity: number;
+    availableQuantity: number;
+}
+
+export interface OrderAttributes {
+    id?: number;
+    orderId: string;
+    productId: string;
+    sellerId: string;
+    usedQuantity: number;
+    label: string;
+    note: string;
+    status: string;
 }

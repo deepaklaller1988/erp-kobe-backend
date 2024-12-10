@@ -3,7 +3,7 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from '../dbConnect';
 import { SellerShipperAttributes } from '../../types/userTypes';
 
-const SellerShipper = sequelize.define<Model<SellerShipperAttributes>>('seller-shippers', {
+const SellerShippers = sequelize.define<Model<SellerShipperAttributes>>('seller-shippers', {
   id: {
     allowNull: false,
     autoIncrement: true,
@@ -23,4 +23,4 @@ const SellerShipper = sequelize.define<Model<SellerShipperAttributes>>('seller-s
   timestamps: true,
 });
 
-export default SellerShipper;
+export default SellerShippers;

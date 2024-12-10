@@ -30,7 +30,7 @@ const transporter = nodemailer.createTransport({
     logger: true
 });
 
-const sendForgotEmail = (link: any, email: string) => {
+const sendForgotPassword = (link: any, email: string) => {
     return new Promise((resolve, reject) => {
         const message = {
             from: process.env.SENDER_EMAIL_ADDRESS,
@@ -76,6 +76,29 @@ const sendActivationEmail = (link: any, email: string) => {
     });
 }
 
+const sendInvitationEmail = (link: any, email: string) => {
+    return new Promise((resolve, reject) => {
+        const message = {
+            from: process.env.SENDER_EMAIL_ADDRESS,
+            to: email,
+            subject: 'Invitation Email',
+            text: `You are invited by a Seller, please click on the link below to access all products under this seller.\n\n ${link}`
+        };
+
+        //send email
+        transporter.sendMail(message, function (err, info) {
+            if (err) {
+                console.log(err);
+                resolve(false);
+            }
+            else {
+                console.log('sent');
+                resolve(true);
+            }
+        });
+    });
+}
+
 const sendEmail = (html: any, email: any, subject: any, cc?: any, attachment?: any) => {
     return new Promise((resolve, reject) => {
         const message = {
@@ -101,4 +124,4 @@ const sendEmail = (html: any, email: any, subject: any, cc?: any, attachment?: a
     });
 }
 
-export { sendForgotEmail, sendEmail, sendActivationEmail }
+export { sendForgotPassword, sendEmail, sendActivationEmail, sendInvitationEmail }

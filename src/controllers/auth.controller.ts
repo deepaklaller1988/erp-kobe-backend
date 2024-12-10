@@ -1,9 +1,9 @@
-import Users from '../db/models/user';
+import { Users } from '../db/models';
 import { Request, Response } from 'express';
 import { generateToken, generateTokenWithNoExpiry, verifyActivationToken } from '../utils/handleToken';
 import { v4 as uuid_v4 } from 'uuid';
 import { encryptPassword, verifyPassword } from '../utils/handlePassword';
-import { sendActivationEmail, sendForgotEmail } from '../utils/sendmail';
+import { sendActivationEmail, sendForgotPassword } from '../utils/sendmail';
 import sequelize from '../db/dbConnect';
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -236,7 +236,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
         }
 
         const link = `${process.env.ADMIN_URL}/auth/verification?type=reset-password&token=${token.token}`;
-        let result = await sendForgotEmail(link, user?.email);
+        let result = await sendForgotPassword(link, user?.email);
 
         if (result === true) {
             return res.sendSuccess(res, { message: 'Password reset email has been sent successfully' }, 200);
@@ -298,7 +298,6 @@ export const resetPassword = async (req: Request, res: Response) => {
         });
         return res.sendSuccess(res, { status: true, message: 'Password changed successfully' }, 200);
     } catch (error: any) {
-        console.error(error);
         return res.sendError(res, error.message);
     }
 };
