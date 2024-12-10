@@ -1,0 +1,80 @@
+class HttpError {
+  code: String;
+  statusCode: number;
+
+  constructor(code: string, statusCode: number) {
+    this.code = code;
+    this.statusCode = statusCode;
+  }
+}
+
+const ERRORS: { [key: string]: HttpError } = {
+  /** VALIDATION */
+  ERR_VALIDATION: new HttpError("ERR_VALIDATION", 400),
+  /** INTERNAL SERVER ERROR */
+  ERR_INTERNAL_SERVER_ERROR: new HttpError("ERR_INTERNAL_SERVER_ERROR", 500),
+  /**
+   * -- AUTH --
+   */
+  ERR_AUTH_WRONG_USERNAME_OR_PASSWORD: new HttpError(
+    "ERR_AUTH_WRONG_USERNAME_OR_PASSWORD",
+    403
+  ),
+  ERR_NOT_AUTHORIZED: new HttpError("ERR_NOT_AUTHORIZED", 403),
+  ERR_AUTH_USERNAME_OR_EMAIL_ALREADY_EXIST: new HttpError(
+    "ERR_AUTH_USERNAME_OR_EMAIL_ALREADY_EXIST",
+    403
+  ),
+  ERR_AUTH_WRONG_REFRESH_TOKEN: new HttpError(
+    "ERR_AUTH_WRONG_REFRESH_TOKEN",
+    403
+  ),
+  ERR_AUTH_REFRESH_EXPIRED: new HttpError(
+    "ERR_AUTH_REFRESH_EXPIRED",
+    403
+  ),
+  ERR_AUTH_ACCESS_TOKEN_MISSING: new HttpError(
+    "ERR_AUTH_ACCESS_TOKEN_MISSING",
+    401
+  ),
+  ERR_WRONG_INDEX: new HttpError("ERR_WRONG_INDEX", 404),
+  ERR_AUTH_INVALID_TOKEN: new HttpError("ERR_AUTH_INVALID_TOKEN", 403),
+  /** Password Reset */
+  ERR_AUTH_WRONG_PASSWORD_RESET_TOKEN: new HttpError(
+    "ERR_AUTH_WRONG_PASSWORD_RESET_TOKEN",
+    403
+  ),
+  ERR_AUTH_EXPIRED_PASSWORD_RESET_TOKEN: new HttpError(
+    "ERR_AUTH_EXPIRED_PASSWORD_RESET_TOKEN",
+    403
+  ),
+  ERR_AUTH_PASSWORD_RESET_WRONG_EMAIL: new HttpError(
+    "ERR_AUTH_PASSWORD_RESET_WRONG_EMAIL",
+    403
+  ),
+
+  ERR_AUTH_WRONG_PASSWORD_RESET_CODE: new HttpError(
+    "ERR_AUTH_WRONG_PASSWORD_RESET_CODE",
+    403
+  ),
+  ERR_AUTH_EXPIRED_PASSWORD_RESET_CODE: new HttpError(
+    "ERR_AUTH_EXPIRED_PASSWORD_RESET_CODE",
+    403
+  ),
+  /** Access-Token */
+  ERR_AUTH_ACCESS_TOKEN_EXPIRED: new HttpError(
+    "ERR_AUTH_ACCESS_TOKEN_EXPIRED",
+    403
+  ),
+  ERR_AUTH_GOOGLE_WRONG_ID_TOKEN: new HttpError(
+    "ERR_AUTH_GOOGLE_WRONG_ID_TOKEN",
+    403
+  ),
+  ERR_AUTH_SHOULD_REGISTER: new HttpError("ERR_AUTH_SHOULD_REGISTER", 403),
+  /**
+   * -- TASKS --
+   */
+  ERR_TASKS_TASK_NOT_FOUND: new HttpError("ERR_TASKS_TASK_NOT_FOUND", 404),
+};
+
+export default ERRORS;
