@@ -6,7 +6,7 @@ import setInterface from "./middlewares/interface";
 import UserRouter from "./routes/auth.route";
 import ProductRouter from "./routes/product.route";
 import OrderRouter from "./routes/order.route";
-import SellerShipperRouter from "./routes/product.route";
+import SellerShipperRouter from "./routes/seller-shipper.route";
 
 const app = express();
 const PORT = process.env.PORT;

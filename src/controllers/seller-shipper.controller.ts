@@ -1,5 +1,5 @@
 import { generateTokenWithNoExpiry, verifyActivationToken } from '../utils/handleToken';
-import { Users } from '../db/models';
+import { Orders, Products, Users } from '../db/models';
 import { AuthenticatedRequest } from '../types/middlewareTypes';
 import { Response } from 'express';
 import { sendInvitationEmail } from '../utils/sendmail';
@@ -68,7 +68,9 @@ export const acceptInvitation = async (req: AuthenticatedRequest, res: Response)
             }
         }
 
-        let { sellerId, shipperId } = JSON.parse(data);
+        let { sellerId, shipperId } = JSON.parse(data.userId);
+
+        console.log(data, sellerId, shipperId, 'popopopopop')
 
         let checkSeller: any = await Users.findOne({
             where: {
@@ -96,12 +98,92 @@ export const acceptInvitation = async (req: AuthenticatedRequest, res: Response)
             return res.sendError(res, "ERR_SHIPPER_NOT_FOUND");
         }
 
+        let checkIfAssociationAlreadyExists = await SellerShippers.findOne({
+            where: {
+                sellerId,
+                shipperId
+            }
+        })
+        if (checkIfAssociationAlreadyExists) {
+            return res.sendError(res, "ERR_INVITATION_ALREADY_ACCEPTED");
+        }
+
         await SellerShippers.create({
             sellerId,
             shipperId
         })
 
         return res.sendSuccess(res, { message: 'Invitation accepted' }, 200);
+    } catch (error: any) {
+        console.log(error)
+        return res.sendError(res, error.message);
+    }
+}
+
+export const allOrdersOfaSellerShipper = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        let { sellerId } = await req.body;
+        if (!sellerId) {
+            return res.sendError(res, "ERR_MISSING_SELLER_ID");
+        }
+        let checkUser = await Users.findOne({
+            where: {
+                userId: sellerId
+            }
+        })
+        if (!checkUser) {
+            return res.sendError(res, "ERR_SELLER_NOT_FOUND");
+        }
+
+        let orders = await Orders.findAndCountAll({
+            where: {
+                sellerId
+            },
+            include: [Products],
+            offset: offset,
+            limit: limit,
+        });
+
+        return res.sendSuccess(res, orders, 200);
+    } catch (error: any) {
+        return res.sendError(res, error.message);
+    }
+}
+
+export const getAllSellerOfaShipper = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        let userId = await req.userId;
+
+        if (!userId) {
+            return res.sendError(res, "ERR_MISSING_SHIPPER_ID");
+        }
+        let checkShipper = await Users.findOne({
+            where: {
+                userId
+            }
+        })
+        if (!checkShipper) {
+            return res.sendError(res, "ERR_USER_NOT_FOUND");
+        }
+
+        let getAllAssociatedSellersList = await SellerShippers.findAndCountAll({
+            where: {
+                shipperId: userId
+            },
+            include: [Users],
+            offset: offset,
+            limit: limit,
+        });
+
+        return res.sendSuccess(res, getAllAssociatedSellersList, 200);
     } catch (error: any) {
         return res.sendError(res, error.message);
     }

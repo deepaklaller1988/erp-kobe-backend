@@ -6,7 +6,7 @@ const router = express();
 
 router.use(accessControl);
 router.route('/by-seller').get(getAllOrdersOfaSeller);
-// router.route('/by-product').get(getAllOrdersOfaProduct);
+router.route('/by-product').get(getAllOrdersOfaProduct);
 router.route('/').post(createOrder);
 router.route('/upload-lable').post(uploadLabel);
 

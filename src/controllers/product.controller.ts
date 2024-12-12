@@ -1,5 +1,5 @@
 import { AuthenticatedRequest } from '../types/middlewareTypes';
-import { Products, Users } from '../db/models';
+import { Products, SellerShippers, Users } from '../db/models';
 import { Response } from 'express';
 import { v4 as uuid_v4 } from 'uuid';
 

@@ -69,6 +69,7 @@ export const getAllOrdersOfaProduct = async (req: AuthenticatedRequest, res: Res
             where: {
                 productId
             },
+            include: [Products],
             offset: offset,
             limit: limit,
         });

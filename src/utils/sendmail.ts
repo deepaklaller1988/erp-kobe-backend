@@ -85,7 +85,6 @@ const sendInvitationEmail = (link: any, email: string) => {
             text: `You are invited by a Seller, please click on the link below to access all products under this seller.\n\n ${link}`
         };
 
-        //send email
         transporter.sendMail(message, function (err, info) {
             if (err) {
                 console.log(err);
