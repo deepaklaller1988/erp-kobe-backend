@@ -29,6 +29,7 @@ export const getAllOrdersOfaSeller = async (req: AuthenticatedRequest, res: Resp
             where: {
                 sellerId: userId
             },
+            include: [Products],
             offset: offset,
             limit: limit,
         });
