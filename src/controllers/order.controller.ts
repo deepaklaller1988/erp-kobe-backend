@@ -3,6 +3,8 @@ import { AuthenticatedRequest } from '../types/middlewareTypes';
 import { Response } from 'express';
 import { v4 as uuid_v4 } from 'uuid';
 import sequelize from '../db/dbConnect';
+import multer from 'multer';
+import fs from 'fs';
 
 export const getAllOrdersOfaSeller = async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -199,3 +201,41 @@ export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response
         return res.sendError(res, error.message);
     }
 }
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dirPath = `./uploads`;
+
+        if (!fs.existsSync(dirPath)) {
+            fs.mkdirSync(dirPath, { recursive: true });
+        }
+        cb(null, dirPath);
+    },
+    filename: (req, file, cb) => {
+        const newFileName = `label-${new Date().getMilliseconds().toString()}-${file.originalname}`;
+        cb(null, newFileName);
+    }
+});
+
+const upload = multer({ storage });
+
+export const uploadLabel = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const file = req.file;
+        if (!file) {
+            return res.sendError(res, "ERR_MISSING_PDF");
+        }
+        upload.single('files')(req, res, (err: any) => {
+            if (err) {
+                return res.sendError(res, err.message || "ERR_UPLOAD_FAILED");
+            }
+
+            const newURL = file.filename;
+
+            return res.sendSuccess(res, { url: newURL }, 200);
+        });
+    } catch (error: any) {
+        console.error("File upload error: ", error);
+        return res.sendError(res, error.message);
+    }
+};

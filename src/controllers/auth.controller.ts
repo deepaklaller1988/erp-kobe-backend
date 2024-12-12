@@ -136,6 +136,15 @@ export const login = async (req: Request, res: Response) => {
     }
 }
 
+export const logout = async (req: Request, res: Response) => {
+    try {
+        res.clearCookie("token");
+        return res.sendSuccess(res, { message: 'User logout successfully' }, 200);
+    } catch (error: any) {
+        return res.sendError(res, error.message);
+    }
+}
+
 export const activateAccount = async (req: Request, res: Response) => {
     const { token }: any = req.query;
     try {
