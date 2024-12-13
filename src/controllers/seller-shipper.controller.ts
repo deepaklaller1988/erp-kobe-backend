@@ -148,6 +148,9 @@ export const allOrdersOfaSellerShipper = async (req: AuthenticatedRequest, res: 
             include: [Products],
             offset: offset,
             limit: limit,
+            order: [
+                ["id", "DESC"]
+            ]
         });
 
         return res.sendSuccess(res, orders, 200);
@@ -168,7 +171,6 @@ export const getAllSellerOfaShipper = async (req: AuthenticatedRequest, res: Res
             return res.sendError(res, "ERR_MISSING_SHIPPER_ID");
         }
 
-        // Check if the user is a valid shipper
         const checkShipper = await Users.findOne({
             where: {
                 userId
@@ -179,7 +181,6 @@ export const getAllSellerOfaShipper = async (req: AuthenticatedRequest, res: Res
             return res.sendError(res, "ERR_USER_NOT_FOUND");
         }
 
-        // Raw SQL Query to fetch associated sellers with pagination
         const query = `
             SELECT 
                 ss.id AS seller_shipper_id,
@@ -202,7 +203,6 @@ export const getAllSellerOfaShipper = async (req: AuthenticatedRequest, res: Res
             LIMIT :limit OFFSET :offset
         `;
 
-        // Query to get the total count of sellers
         const countQuery = `
             SELECT COUNT(*) as totalCount
             FROM 
@@ -212,25 +212,21 @@ export const getAllSellerOfaShipper = async (req: AuthenticatedRequest, res: Res
         `;
 
         try {
-            // Execute the main query for sellers with pagination
-            const [results, metadata]: any = await sequelize.query(query, {
+            const [results]: any = await sequelize.query(query, {
                 replacements: { userId, limit, offset },
                 type: QueryTypes.SELECT
             });
 
-            // Execute the query for the total count of sellers
             const countResult: any = await sequelize.query(countQuery, {
                 replacements: { userId },
                 type: QueryTypes.SELECT
             });
 
-            // Extract the total count from the query result
             const totalCount = countResult[0]?.totalCount || 0;
 
-            // Ensure that `results` is always an array, even if only one item was returned
             const responseData = {
-                count: totalCount, // The total count of associated sellers (ignoring pagination)
-                rows: Array.isArray(results) ? results : results ? [results] : [],  // Convert to array if not already
+                count: totalCount,
+                rows: Array.isArray(results) ? results : results ? [results] : [],
             };
 
             return res.sendSuccess(res, responseData, 200);
