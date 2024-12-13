@@ -234,8 +234,8 @@ export const forgotPassword = async (req: Request, res: Response) => {
         if (!user) {
             return res.sendError(res, "ERR_USER_NOT_FOUND");
         }
-        if (user?.verified) {
-            return res.sendError(res, "ERR_ACCOUNT_ALREADY_VERIFIED");
+        if (!user?.verified) {
+            return res.sendError(res, "ERR_ACCOUNT_NOT_VERIFIED");
         }
 
         let token = await generateTokenWithNoExpiry(user?.userId);
