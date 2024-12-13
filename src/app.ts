@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config({ path: `.env` });
+import path from 'path';
+import fs from 'fs';
 import setInterface from "./middlewares/interface";
 import UserRouter from "./routes/auth.route";
 import ProductRouter from "./routes/product.route";
@@ -24,6 +26,9 @@ var corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(setInterface);
+
+const uploadDir = path.join(process.cwd(), 'uploads');
+app.use('/api/v1/uploads', express.static(uploadDir));
 
 app.use('/api/v1/auth', UserRouter);
 app.use('/api/v1/product', ProductRouter);

@@ -6,13 +6,16 @@ module.exports = {
       id: {
         allowNull: false,
         autoIncrement: true,
-        primaryKey: true,
         type: Sequelize.INTEGER
       },
       sellerId: {
+        allowNull: false,
+        primaryKey: true,
         type: Sequelize.STRING
       },
       shipperId: {
+        allowNull: false,
+        primaryKey: true,
         type: Sequelize.STRING
       },
       createdAt: {

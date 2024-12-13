@@ -7,15 +7,16 @@ const SellerShippers = sequelize.define<Model<SellerShipperAttributes>>('seller-
   id: {
     allowNull: false,
     autoIncrement: true,
-    primaryKey: true,
     type: DataTypes.INTEGER
   },
   sellerId: {
     allowNull: false,
+    primaryKey: true,
     type: DataTypes.STRING
   },
   shipperId: {
     allowNull: false,
+    primaryKey: true,
     type: DataTypes.STRING
   },
 }, {

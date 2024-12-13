@@ -4,6 +4,8 @@ import { AuthenticatedRequest } from '../types/middlewareTypes';
 import { Response } from 'express';
 import { sendInvitationEmail } from '../utils/sendmail';
 import { SellerShippers } from '../db/models';
+import sequelize from '../db/dbConnect';
+import { QueryTypes } from 'sequelize';
 
 export const inviteShipper = async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -126,7 +128,7 @@ export const allOrdersOfaSellerShipper = async (req: AuthenticatedRequest, res: 
         const limit = Number(req.query.limit) || 10;
         const offset = (page - 1) * limit;
 
-        let { sellerId } = await req.body;
+        let sellerId: any = req.query.sellerId;
         if (!sellerId) {
             return res.sendError(res, "ERR_MISSING_SELLER_ID");
         }
@@ -160,31 +162,85 @@ export const getAllSellerOfaShipper = async (req: AuthenticatedRequest, res: Res
         const limit = Number(req.query.limit) || 10;
         const offset = (page - 1) * limit;
 
-        let userId = await req.userId;
+        const userId = req.userId;
 
         if (!userId) {
             return res.sendError(res, "ERR_MISSING_SHIPPER_ID");
         }
-        let checkShipper = await Users.findOne({
+
+        // Check if the user is a valid shipper
+        const checkShipper = await Users.findOne({
             where: {
                 userId
             }
-        })
+        });
+
         if (!checkShipper) {
             return res.sendError(res, "ERR_USER_NOT_FOUND");
         }
 
-        let getAllAssociatedSellersList = await SellerShippers.findAndCountAll({
-            where: {
-                shipperId: userId
-            },
-            include: [Users],
-            offset: offset,
-            limit: limit,
-        });
+        // Raw SQL Query to fetch associated sellers with pagination
+        const query = `
+            SELECT 
+                ss.id AS seller_shipper_id,
+                ss."sellerId",   
+                ss."shipperId",
+                u_seller."userId" AS seller_userId,
+                u_seller.email AS seller_email,
+                u_seller.name AS seller_name,
+                u_shipper."userId" AS shipper_userId,
+                u_shipper.email AS shipper_email,
+                u_shipper.name AS shipper_name
+            FROM 
+                "seller-shippers" ss
+            JOIN 
+                "users" u_seller ON u_seller."userId" = ss."sellerId"
+            JOIN 
+                "users" u_shipper ON u_shipper."userId" = ss."shipperId"
+            WHERE 
+                ss."shipperId" = :userId
+            LIMIT :limit OFFSET :offset
+        `;
 
-        return res.sendSuccess(res, getAllAssociatedSellersList, 200);
+        // Query to get the total count of sellers
+        const countQuery = `
+            SELECT COUNT(*) as totalCount
+            FROM 
+                "seller-shippers" ss
+            WHERE 
+                ss."shipperId" = :userId
+        `;
+
+        try {
+            // Execute the main query for sellers with pagination
+            const [results, metadata]: any = await sequelize.query(query, {
+                replacements: { userId, limit, offset },
+                type: QueryTypes.SELECT
+            });
+
+            // Execute the query for the total count of sellers
+            const countResult: any = await sequelize.query(countQuery, {
+                replacements: { userId },
+                type: QueryTypes.SELECT
+            });
+
+            // Extract the total count from the query result
+            const totalCount = countResult[0]?.totalCount || 0;
+
+            // Ensure that `results` is always an array, even if only one item was returned
+            const responseData = {
+                count: totalCount, // The total count of associated sellers (ignoring pagination)
+                rows: Array.isArray(results) ? results : results ? [results] : [],  // Convert to array if not already
+            };
+
+            return res.sendSuccess(res, responseData, 200);
+        } catch (error: any) {
+            console.error(error);
+            return res.sendError(res, error.message);
+        }
     } catch (error: any) {
+        console.error(error);
         return res.sendError(res, error.message);
     }
-}
+};
+
