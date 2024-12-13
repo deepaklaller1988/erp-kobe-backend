@@ -29,6 +29,16 @@ export const inviteShipper = async (req: AuthenticatedRequest, res: Response) =>
             return res.sendError(res, "ERR_SHIPPER_NOT_VERIFIED");
         }
 
+        let checkAssociation = await SellerShippers.findOne({
+            where: {
+                sellerId: userId,
+                shipperId: checkShipper?.userId
+            }
+        });
+        if(checkAssociation){
+            return res.sendError(res, "ERR_SHIPPER_ALREADY_INVITED");
+        }
+
         let body = {
             sellerId: userId,
             shipperId: checkShipper?.userId
