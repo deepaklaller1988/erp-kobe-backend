@@ -5,7 +5,7 @@
   "scripts": {
     "watch": "tsc --watch",
     "dev": "npx sequelize db:migrate && nodemon dist/app.js",
-    "start": "npx sequelize db:migrate && nodemon dist/app.js",
+    "start": "npx sequelize db:migrate && node dist/app.js",
     "build": "rm -Rf dist/ && tsc"
   },
   "keywords": [],
