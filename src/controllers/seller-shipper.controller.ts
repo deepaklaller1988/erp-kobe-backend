@@ -25,6 +25,10 @@ export const inviteShipper = async (req: AuthenticatedRequest, res: Response) =>
             return res.sendError(res, "ERR_SHIPPER_NOT_FOUND");
         }
 
+        if (!checkShipper.verified) {
+            return res.sendError(res, "ERR_SHIPPER_NOT_VERIFIED");
+        }
+
         let body = {
             sellerId: userId,
             shipperId: checkShipper?.userId
