@@ -184,34 +184,33 @@ export const activateAccount = async (req: Request, res: Response) => {
         checkUser.verified = true;
         await checkUser.save();
 
-        let accessToken = await generateToken(checkUser?.userId, "access");
+        // let accessToken = await generateToken(checkUser?.userId, "access");
 
-        if (!accessToken.success) {
-            return res.sendError(res, "ERR_TOKEN_GENERATE_FAILED");
-        }
+        // if (!accessToken.success) {
+        //     return res.sendError(res, "ERR_TOKEN_GENERATE_FAILED");
+        // }
 
-        const cookieMaxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
-        res.cookie('token', accessToken.token, {
-            httpOnly: true,
-            secure: false,
-            maxAge: cookieMaxAge,
-            sameSite: 'strict'
-        });
+        // const cookieMaxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+        // res.cookie('token', accessToken.token, {
+        //     httpOnly: true,
+        //     secure: false,
+        //     maxAge: cookieMaxAge,
+        //     sameSite: 'strict'
+        // });
 
-        let response = {
-            id: checkUser?.id,
-            userId: checkUser?.userId,
-            type: checkUser?.type,
-            name: checkUser?.name,
-            email: checkUser?.email,
-            accessToken: accessToken?.token,
-            verified: true,
-        }
+        // let response = {
+        //     id: checkUser?.id,
+        //     userId: checkUser?.userId,
+        //     type: checkUser?.type,
+        //     name: checkUser?.name,
+        //     email: checkUser?.email,
+        //     accessToken: accessToken?.token,
+        //     verified: true,
+        // }
 
-        return res.sendSuccess(res, response, 200);
+        return res.sendSuccess(res, {message: "Account successfully verified"}, 200);
 
     } catch (error: any) {
-        console.log(error)
         res.sendError(res, error?.message);
     }
 }
@@ -231,6 +230,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
                 where: { email }
             }
         );
+
         if (!user) {
             return res.sendError(res, "ERR_USER_NOT_FOUND");
         }
@@ -253,7 +253,6 @@ export const forgotPassword = async (req: Request, res: Response) => {
             return res.sendError(res, 'Error while sending forgot password email');
         }
     } catch (error: any) {
-        console.error(error);
         return res.sendError(res, error.message);
     }
 };
@@ -289,8 +288,8 @@ export const resetPassword = async (req: Request, res: Response) => {
             return res.sendError(res, "ERR_USER_NOT_FOUND");
         }
 
-        if (checkUser.verified) {
-            return res.sendError(res, "ERR_ACCOUNT_ALREADY_VERIFIED");
+        if (!checkUser.verified) {
+            return res.sendError(res, "ERR_ACCOUNT_NOT_VERIFIED");
         }
 
         let securedPassword: any = await encryptPassword(password);
@@ -310,3 +309,73 @@ export const resetPassword = async (req: Request, res: Response) => {
         return res.sendError(res, error.message);
     }
 };
+
+export const verifyPasswordResetLink = async (req: Request, res: Response) => {
+    const { token }: any = req.query;
+    try {
+        if (!token) {
+            return res.sendError(res, "ERR_MISSING_TOKEN");
+        }
+
+        const { data, error }: any = await verifyActivationToken(token);
+
+        if (error) {
+            switch (error.name) {
+                case "JsonWebTokenError":
+                    return res.sendError(res, "ERR_INVALID_TOKEN");
+                case "TokenExpiredError":
+                    return res.sendError(res, "ERR_TOKEN_EXPIRED");
+                default:
+                    res.sendError(res, "ERR_INVALID_TOKEN");
+            }
+        }
+
+        let checkUser: any = await Users.findOne({
+            where: {
+                userId: data.userId,
+            },
+            attributes: {
+                exclude: ['createdAt', 'updatedAt']
+            }
+        });
+        if (!checkUser) {
+            return res.sendError(res, "ERR_USER_NOT_FOUND");
+        }
+
+        if (!checkUser.verified) {
+            return res.sendError(res, "ERR_ACCOUNT_NOT_VERIFIED");
+        }
+
+        // checkUser.verified = true;
+        // await checkUser.save();
+
+        // let accessToken = await generateToken(checkUser?.userId, "access");
+
+        // if (!accessToken.success) {
+        //     return res.sendError(res, "ERR_TOKEN_GENERATE_FAILED");
+        // }
+
+        // const cookieMaxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+        // res.cookie('token', accessToken.token, {
+        //     httpOnly: true,
+        //     secure: false,
+        //     maxAge: cookieMaxAge,
+        //     sameSite: 'strict'
+        // });
+
+        // let response = {
+        //     id: checkUser?.id,
+        //     userId: checkUser?.userId,
+        //     type: checkUser?.type,
+        //     name: checkUser?.name,
+        //     email: checkUser?.email,
+        //     accessToken: accessToken?.token,
+        //     verified: true,
+        // }
+
+        return res.sendSuccess(res, {message: "Link verified"}, 200);
+
+    } catch (error: any) {
+        res.sendError(res, error?.message);
+    }
+}
